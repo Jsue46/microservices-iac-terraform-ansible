@@ -1,0 +1,22 @@
+{
+  "name": "servicios-medicos",
+  "version": "1.0.0",
+  "description": "Microservicio de Servicios Medicos para la Practica 2 de AYD2.",
+  "type": "module",
+  "main": "src/server.ts",
+  "scripts": {
+    "start": "node src/server.ts",
+    "dev": "node --watch src/server.ts",
+    "test": "node tests/run-smoke-tests.ts"
+  },
+  "keywords": [
+    "microservice",
+    "medical-services",
+    "ayd2"
+  ],
+  "author": "Grupo 6",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.20.0"
+  }
+}

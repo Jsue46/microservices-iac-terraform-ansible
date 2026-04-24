@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Local reference material not intended for delivery
+reference/
+
+# Local test or cache artifacts
+.pytest_cache/
+dist/
+build/
