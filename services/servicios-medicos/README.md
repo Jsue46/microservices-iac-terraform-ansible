@@ -26,6 +26,11 @@ Este componente cubre especificamente:
 
 No incluye frontend ni logica del microservicio de Especialidades.
 
+## Documentacion complementaria
+
+- [Integracion con API Gateway](./INTEGRACION_GATEWAY.md)
+- [Modelo de datos](./docs/modelo-datos.md)
+
 ## Estructura interna
 
 ```text
