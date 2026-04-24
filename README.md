@@ -54,13 +54,14 @@ AYD2_A_2S2026_PRAC2_G6/
 |-- docs/
 |   |-- arquitectura-despliegue.md
 |   |-- enunciado_extraido.txt
-|   `-- manual-usuario.md
+|   |-- manual-usuario.md
+|   `-- Practica 2.docx (1).pdf
 |-- frontend/
-|   |-- src/
-|   |   |-- app.js
-|   |   `-- index.html
 |   |-- Dockerfile
-|   `-- nginx.conf
+|   |-- nginx.conf
+|   `-- src/
+|       |-- app.js
+|       `-- index.html
 |-- gateway/
 |   |-- Dockerfile
 |   `-- nginx.conf
@@ -76,15 +77,41 @@ AYD2_A_2S2026_PRAC2_G6/
 |       `-- variables.tf
 |-- services/
 |   |-- especialidades/
-|   |   |-- src/
-|   |   |   `-- server.js
 |   |   |-- Dockerfile
-|   |   `-- package.json
+|   |   |-- package.json
+|   |   `-- src/
+|   |       `-- server.js
 |   `-- servicios-medicos/
-|       |-- src/
-|       |   `-- server.js
+|       |-- .dockerignore
+|       |-- .env.example
 |       |-- Dockerfile
-|       `-- package.json
+|       |-- docs/
+|       |   `-- modelo-datos.md
+|       |-- package-lock.json
+|       |-- package.json
+|       |-- README.md
+|       |-- src/
+|       |   |-- app.ts
+|       |   |-- server.ts
+|       |   |-- types.ts
+|       |   |-- config/
+|       |   |   `-- env.ts
+|       |   |-- controllers/
+|       |   |   `-- medicalServiceController.ts
+|       |   |-- data/
+|       |   |   `-- medicalServicesSeed.ts
+|       |   |-- repositories/
+|       |   |   |-- medicalServiceRepository.ts
+|       |   |   `-- postgresMedicalServiceRepository.ts
+|       |   |-- routes/
+|       |   |   `-- medicalServiceRouter.ts
+|       |   |-- services/
+|       |   |   `-- medicalServiceService.ts
+|       |   |-- utils/
+|       |   |   `-- http.ts
+|       |-- tests/
+|       |   `-- run-smoke-tests.ts
+|       `-- tsconfig.json
 |-- docker-compose.yml
 `-- README.md
 ```
