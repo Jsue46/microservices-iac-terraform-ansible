@@ -1,0 +1,47 @@
+gcp_project_id       = "tu-proyecto-gcp"
+gcp_region           = "us-central1"
+gcp_zone             = "us-central1-a"
+
+# Path absoluto al JSON de service account. Opcional si usas
+# la variable de entorno GOOGLE_APPLICATION_CREDENTIALS.
+gcp_credentials_file = ""
+
+project_name         = "ayd2-prac2-g6"
+environment          = "dev"
+
+# Free-tier safe defaults
+deployment_mode      = "free-tier"
+create_cloud_sql     = false
+create_static_ips    = false
+
+# Seguridad SSH (recomendado usar tu IP publica/32)
+allowed_ssh_cidr     = "0.0.0.0/0"
+ansible_user         = "debian"
+ansible_ssh_private_key_file = "~/.ssh/id_rsa"
+
+# Opcional: pega aqui tu llave publica para acceso SSH en las VMs
+ssh_public_key       = ""
+
+# Red
+public_subnet_cidr   = "10.0.1.0/24"
+private_subnet_cidr  = "10.0.11.0/24"
+
+# VM
+instance_type        = "e2-micro"
+boot_disk_size_gb    = 20
+image_project        = "debian-cloud"
+image_family         = "debian-12"
+
+# Cloud SQL (solo si create_cloud_sql = true)
+db_name              = "catalogo"
+db_username          = "appuser"
+db_password          = ""
+cloud_sql_tier       = "db-f1-micro"
+cloud_sql_disk_size_gb = 10
+cloud_sql_version    = "POSTGRES_15"
+cloud_sql_authorized_cidrs = ["0.0.0.0/0"]
+
+# Full demo (puede generar costos)
+# deployment_mode   = "full"
+# create_cloud_sql  = true
+# create_static_ips = true

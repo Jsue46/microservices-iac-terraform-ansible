@@ -1,0 +1,35 @@
+services:
+  servicios-medicos:
+    build:
+      context: ./services/servicios-medicos
+    container_name: servicios-medicos
+    environment:
+      PORT: 3001
+      HOST: 0.0.0.0
+      SERVICE_NAME: servicios-medicos
+      API_PREFIX: /api/v1
+      PERSISTENCE_MODE: memory
+    expose:
+      - "3001"
+
+  especialidades:
+    build:
+      context: ./services/especialidades
+    container_name: especialidades
+    environment:
+      PORT: 3002
+      HOST: 0.0.0.0
+      SERVICE_NAME: especialidades
+      API_PREFIX: /api/v1
+    expose:
+      - "3002"
+
+  gateway:
+    build:
+      context: ./gateway
+    container_name: gateway
+    depends_on:
+      - servicios-medicos
+      - especialidades
+    ports:
+      - "8080:80"
