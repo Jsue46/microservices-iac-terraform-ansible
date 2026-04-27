@@ -22,9 +22,25 @@ locals {
   )
 }
 
+resource "google_project_service" "compute_api" {
+  project            = var.gcp_project_id
+  service            = "compute.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "sqladmin_api" {
+  count = var.create_cloud_sql ? 1 : 0
+
+  project            = var.gcp_project_id
+  service            = "sqladmin.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_compute_network" "main" {
   name                    = "${var.project_name}-${var.environment}-vpc"
   auto_create_subnetworks = false
+
+  depends_on = [google_project_service.compute_api]
 }
 
 resource "google_compute_subnetwork" "public" {
@@ -141,6 +157,8 @@ resource "google_sql_database_instance" "postgres" {
       error_message = "Set db_password (min 8 chars) when create_cloud_sql=true."
     }
   }
+
+  depends_on = [google_project_service.sqladmin_api]
 }
 
 resource "google_sql_database" "app" {
