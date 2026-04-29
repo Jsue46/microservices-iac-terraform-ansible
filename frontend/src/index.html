@@ -1,97 +1,724 @@
 <!DOCTYPE html>
 <html lang="es">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>AYD2 Práctica 2 - Catálogo</title>
-		<style>
-			body {
-				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-				max-width: 960px;
-				margin: 32px auto;
-				padding: 0 20px;
-				color: #1f2937;
-			}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema Médico — AYD2 G6</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-			h1 {
-				margin-bottom: 8px;
-			}
+      :root {
+        --blue:       #2563eb;
+        --blue-light: #eff6ff;
+        --blue-dark:  #1d4ed8;
+        --green:      #059669;
+        --green-light:#ecfdf5;
+        --yellow:     #d97706;
+        --yellow-light:#fffbeb;
+        --red:        #dc2626;
+        --red-light:  #fef2f2;
+        --gray-50:    #f9fafb;
+        --gray-100:   #f3f4f6;
+        --gray-200:   #e5e7eb;
+        --gray-400:   #9ca3af;
+        --gray-600:   #4b5563;
+        --gray-700:   #374151;
+        --gray-900:   #111827;
+        --radius:     10px;
+        --shadow:     0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+        --shadow-md:  0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+      }
 
-			.hint {
-				color: #6b7280;
-				margin-bottom: 24px;
-			}
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: var(--gray-50);
+        color: var(--gray-900);
+        min-height: 100vh;
+      }
 
-			.actions {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 12px;
-				margin-bottom: 20px;
-			}
+      /* ── NAV ── */
+      nav {
+        background: #fff;
+        border-bottom: 1px solid var(--gray-200);
+        position: sticky; top: 0; z-index: 100;
+      }
+      .nav-inner {
+        max-width: 1100px; margin: 0 auto;
+        padding: 0 20px;
+        display: flex; align-items: center; gap: 32px; height: 60px;
+      }
+      .nav-brand {
+        font-weight: 700; font-size: 1.05rem; color: var(--blue);
+        display: flex; align-items: center; gap: 8px;
+      }
+      .nav-brand svg { flex-shrink: 0; }
+      .nav-tabs { display: flex; gap: 4px; }
+      .nav-tab {
+        padding: 6px 16px; border-radius: 8px; border: none;
+        background: transparent; font-size: .9rem; font-weight: 500;
+        color: var(--gray-600); cursor: pointer; transition: background .15s, color .15s;
+      }
+      .nav-tab:hover { background: var(--gray-100); color: var(--gray-900); }
+      .nav-tab.active { background: var(--blue-light); color: var(--blue); }
 
-			button {
-				border: none;
-				border-radius: 8px;
-				padding: 12px 18px;
-				background: #2563eb;
-				color: #fff;
-				font-weight: 600;
-				cursor: pointer;
-			}
+      /* ── MAIN ── */
+      main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
 
-			button.secondary {
-				background: #10b981;
-			}
+      /* ── VIEW TRANSITIONS ── */
+      .view { display: none; }
+      .view.active { display: block; }
 
-			pre {
-				background: #111827;
-				color: #e5e7eb;
-				padding: 16px;
-				border-radius: 12px;
-				min-height: 200px;
-				overflow: auto;
-			}
-		</style>
-	</head>
-	<body>
-		<h1>Prueba rápida de endpoints</h1>
-		<p class="hint">
-			Botones para validar los endpoints reales del proyecto. Ajusta la variable
-			<strong>GATEWAY_BASE_URL</strong> si cambias el puerto/IP del gateway.
-		</p>
+      /* ── PAGE HEADER ── */
+      .page-header {
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
+      }
+      .page-title { font-size: 1.5rem; font-weight: 700; }
+      .page-count {
+        font-size: .85rem; color: var(--gray-600);
+        background: var(--gray-100); padding: 3px 10px; border-radius: 20px;
+      }
 
-		<div class="actions">
-			<button id="btn-medicos">Servicios médicos</button>
-			<button id="btn-especialidades" class="secondary">Especialidades</button>
-		</div>
+      /* ── SEARCH BAR ── */
+      .search-bar {
+        display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;
+      }
+      .search-bar input, .search-bar select {
+        padding: 9px 14px; border: 1px solid var(--gray-200); border-radius: var(--radius);
+        font-size: .9rem; background: #fff; color: var(--gray-900);
+        outline: none; transition: border-color .15s;
+      }
+      .search-bar input:focus, .search-bar select:focus {
+        border-color: var(--blue);
+      }
+      .search-bar input { flex: 1; min-width: 200px; }
 
-		<pre id="output">Selecciona un endpoint para consultar.</pre>
+      /* ── GRID ── */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 18px;
+      }
 
-		<script>
-			const GATEWAY_BASE_URL = "http://136.115.185.115:3000";
-			const MEDICOS_ENDPOINT = `${GATEWAY_BASE_URL}/api/v1/medical-services`;
-			const ESPECIALIDADES_ENDPOINT = `${GATEWAY_BASE_URL}/api/v1/especialidades`;
+      /* ── CARD ── */
+      .card {
+        background: #fff; border-radius: var(--radius);
+        box-shadow: var(--shadow); padding: 20px;
+        cursor: pointer; transition: box-shadow .2s, transform .15s;
+        border: 1px solid var(--gray-200);
+        display: flex; flex-direction: column; gap: 10px;
+      }
+      .card:hover {
+        box-shadow: var(--shadow-md); transform: translateY(-2px);
+      }
+      .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+      .card-title { font-size: 1rem; font-weight: 600; line-height: 1.3; }
+      .card-code { font-size: .75rem; color: var(--gray-400); font-family: monospace; }
+      .card-desc { font-size: .875rem; color: var(--gray-600); line-height: 1.5; }
+      .card-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: auto; }
 
-			const output = document.getElementById("output");
+      /* ── BADGES ── */
+      .badge {
+        display: inline-flex; align-items: center;
+        padding: 2px 10px; border-radius: 20px;
+        font-size: .75rem; font-weight: 600; white-space: nowrap;
+      }
+      .badge-available { background: var(--green-light); color: var(--green); }
+      .badge-limited   { background: var(--yellow-light); color: var(--yellow); }
+      .badge-unavailable { background: var(--red-light); color: var(--red); }
+      .badge-active   { background: var(--blue-light); color: var(--blue); }
+      .badge-inactive { background: var(--gray-100); color: var(--gray-600); }
 
-			async function callEndpoint(url) {
-				output.textContent = "Consultando...";
-				try {
-					const response = await fetch(url);
-					const body = await response.text();
-					output.textContent = `Status: ${response.status}\n${body}`;
-				} catch (error) {
-					output.textContent = `Error: ${error.message}`;
-				}
-			}
+      /* ── PRICE ── */
+      .price { font-size: 1rem; font-weight: 700; color: var(--gray-900); }
+      .price span { font-size: .8rem; font-weight: 400; color: var(--gray-400); }
 
-			document.getElementById("btn-medicos").addEventListener("click", () => {
-				callEndpoint(MEDICOS_ENDPOINT);
-			});
+      /* ── BACK BTN ── */
+      .btn-back {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 16px; border-radius: var(--radius); border: 1px solid var(--gray-200);
+        background: #fff; color: var(--gray-700); font-size: .875rem; font-weight: 500;
+        cursor: pointer; transition: background .15s; margin-bottom: 20px;
+      }
+      .btn-back:hover { background: var(--gray-100); }
 
-			document.getElementById("btn-especialidades").addEventListener("click", () => {
-				callEndpoint(ESPECIALIDADES_ENDPOINT);
-			});
-		</script>
-	</body>
+      /* ── DETAIL CARD ── */
+      .detail-card {
+        background: #fff; border-radius: var(--radius);
+        box-shadow: var(--shadow); border: 1px solid var(--gray-200);
+        overflow: hidden;
+      }
+      .detail-hero {
+        padding: 28px 28px 20px;
+        border-bottom: 1px solid var(--gray-200);
+        display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+        flex-wrap: wrap;
+      }
+      .detail-hero-left { display: flex; flex-direction: column; gap: 6px; }
+      .detail-title { font-size: 1.4rem; font-weight: 700; }
+      .detail-code { font-size: .8rem; color: var(--gray-400); font-family: monospace; }
+      .detail-hero-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+      .detail-price { font-size: 1.6rem; font-weight: 800; color: var(--blue); }
+      .detail-price span { font-size: .9rem; font-weight: 400; color: var(--gray-400); }
+
+      .detail-body { padding: 28px; display: flex; flex-direction: column; gap: 24px; }
+
+      .detail-section-title {
+        font-size: .75rem; font-weight: 600; text-transform: uppercase;
+        letter-spacing: .08em; color: var(--gray-400); margin-bottom: 8px;
+      }
+      .detail-text { font-size: .9rem; color: var(--gray-700); line-height: 1.6; }
+
+      .detail-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;
+      }
+      .detail-stat {
+        background: var(--gray-50); border-radius: 8px; padding: 14px 16px;
+        border: 1px solid var(--gray-200);
+      }
+      .detail-stat-label { font-size: .75rem; color: var(--gray-400); margin-bottom: 4px; }
+      .detail-stat-value { font-size: 1rem; font-weight: 600; }
+
+      .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+      .tag {
+        padding: 3px 10px; border-radius: 20px; font-size: .78rem;
+        background: var(--gray-100); color: var(--gray-600); border: 1px solid var(--gray-200);
+      }
+
+      .pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+      .pill {
+        padding: 4px 12px; border-radius: 20px; font-size: .8rem;
+        background: var(--blue-light); color: var(--blue);
+        border: 1px solid #bfdbfe; cursor: pointer;
+        transition: background .15s;
+      }
+      .pill:hover { background: #dbeafe; }
+
+      /* ── EMPTY / LOADING / ERROR ── */
+      .state-box {
+        text-align: center; padding: 60px 20px; color: var(--gray-400);
+        font-size: .95rem;
+      }
+      .state-box .icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+      .spinner {
+        width: 36px; height: 36px; margin: 0 auto 12px;
+        border: 3px solid var(--gray-200); border-top-color: var(--blue);
+        border-radius: 50%; animation: spin .7s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* ── RELATED SERVICES IN SPECIALTY DETAIL ── */
+      .related-list { display: flex; flex-direction: column; gap: 10px; }
+      .related-item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 16px; border-radius: 8px; background: var(--gray-50);
+        border: 1px solid var(--gray-200); cursor: pointer;
+        transition: background .15s;
+      }
+      .related-item:hover { background: var(--blue-light); border-color: #bfdbfe; }
+      .related-item-name { font-size: .9rem; font-weight: 500; }
+      .related-item-price { font-size: .875rem; color: var(--gray-600); }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 600px) {
+        .detail-hero { flex-direction: column; }
+        .detail-hero-right { align-items: flex-start; }
+        .detail-grid { grid-template-columns: 1fr 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- NAV -->
+    <nav>
+      <div class="nav-inner">
+        <div class="nav-brand">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Sistema Médico
+        </div>
+        <div class="nav-tabs">
+          <button class="nav-tab active" data-tab="services">Servicios Médicos</button>
+          <button class="nav-tab"        data-tab="specialties">Especialidades</button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+
+      <!-- ══════════════════════════════════════
+           VIEW: LISTA DE SERVICIOS
+      ══════════════════════════════════════ -->
+      <div class="view active" id="view-services">
+        <div class="page-header">
+          <h1 class="page-title">Servicios Médicos</h1>
+          <span class="page-count" id="services-count"></span>
+        </div>
+        <div class="search-bar">
+          <input id="svc-search" type="text" placeholder="Buscar por nombre o código…" />
+          <select id="svc-status">
+            <option value="">Todos los estados</option>
+            <option value="available">Disponible</option>
+            <option value="limited">Disponibilidad limitada</option>
+            <option value="unavailable">No disponible</option>
+          </select>
+        </div>
+        <div class="grid" id="services-grid"></div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           VIEW: DETALLE DE SERVICIO
+      ══════════════════════════════════════ -->
+      <div class="view" id="view-service-detail">
+        <button class="btn-back" id="back-to-services">
+          ← Volver a Servicios
+        </button>
+        <div class="detail-card" id="service-detail-content"></div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           VIEW: LISTA DE ESPECIALIDADES
+      ══════════════════════════════════════ -->
+      <div class="view" id="view-specialties">
+        <div class="page-header">
+          <h1 class="page-title">Especialidades</h1>
+          <span class="page-count" id="specialties-count"></span>
+        </div>
+        <div class="grid" id="specialties-grid"></div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           VIEW: DETALLE DE ESPECIALIDAD
+      ══════════════════════════════════════ -->
+      <div class="view" id="view-specialty-detail">
+        <button class="btn-back" id="back-to-specialties">
+          ← Volver a Especialidades
+        </button>
+        <div class="detail-card" id="specialty-detail-content"></div>
+      </div>
+
+    </main>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  CONFIG
+      // ─────────────────────────────────────────
+      const API = "/api/v1";
+
+      // ─────────────────────────────────────────
+      //  STATE
+      // ─────────────────────────────────────────
+      let allServices   = [];
+      let allSpecialties = [];
+      let currentTab    = "services";
+
+      // ─────────────────────────────────────────
+      //  NAV
+      // ─────────────────────────────────────────
+      document.querySelectorAll(".nav-tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const tab = btn.dataset.tab;
+          document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentTab = tab;
+          if (tab === "services") {
+            showView("services");
+            if (!allServices.length) loadServices();
+          } else {
+            showView("specialties");
+            if (!allSpecialties.length) loadSpecialties();
+          }
+        });
+      });
+
+      document.getElementById("back-to-services").addEventListener("click", () => showView("services"));
+      document.getElementById("back-to-specialties").addEventListener("click", () => showView("specialties"));
+
+      // ─────────────────────────────────────────
+      //  VIEW MANAGER
+      // ─────────────────────────────────────────
+      function showView(name) {
+        document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+        document.getElementById("view-" + name).classList.add("active");
+      }
+
+      // ─────────────────────────────────────────
+      //  FETCH HELPERS
+      // ─────────────────────────────────────────
+      async function apiFetch(path) {
+        const res = await fetch(API + path);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      }
+
+      // ─────────────────────────────────────────
+      //  RENDER HELPERS
+      // ─────────────────────────────────────────
+      function statusBadge(status) {
+        const map = {
+          available:   ["badge-available",   "Disponible"],
+          limited:     ["badge-limited",     "Limitado"],
+          unavailable: ["badge-unavailable", "No disponible"],
+        };
+        const [cls, label] = map[status] || ["badge-inactive", status];
+        return `<span class="badge ${cls}">${label}</span>`;
+      }
+
+      function activeBadge(isActive) {
+        return isActive
+          ? `<span class="badge badge-active">Activo</span>`
+          : `<span class="badge badge-inactive">Inactivo</span>`;
+      }
+
+      function formatPrice(price, currency = "GTQ") {
+        return `<span class="price">${Number(price).toLocaleString("es-GT", { minimumFractionDigits: 2 })} <span>${currency}</span></span>`;
+      }
+
+      function loading() {
+        return `<div class="state-box"><div class="spinner"></div>Cargando…</div>`;
+      }
+
+      function errorBox(msg) {
+        return `<div class="state-box"><div class="icon">⚠️</div>${msg}</div>`;
+      }
+
+      function emptyBox(msg) {
+        return `<div class="state-box"><div class="icon">🔍</div>${msg}</div>`;
+      }
+
+      // ─────────────────────────────────────────
+      //  SERVICES — LIST
+      // ─────────────────────────────────────────
+      async function loadServices() {
+        const grid = document.getElementById("services-grid");
+        grid.innerHTML = loading();
+        try {
+          const json = await apiFetch("/medical-services?pageSize=100");
+          allServices = json.data?.items ?? json.data ?? [];
+          renderServicesGrid(allServices);
+        } catch (e) {
+          grid.innerHTML = errorBox("No se pudo cargar los servicios médicos. Verifica que el gateway esté activo.");
+        }
+      }
+
+      function renderServicesGrid(services) {
+        const grid  = document.getElementById("services-grid");
+        const count = document.getElementById("services-count");
+        count.textContent = `${services.length} servicio${services.length !== 1 ? "s" : ""}`;
+
+        if (!services.length) {
+          grid.innerHTML = emptyBox("No se encontraron servicios con ese criterio.");
+          return;
+        }
+
+        grid.innerHTML = services.map(s => `
+          <div class="card" data-id="${s.id}" onclick="openServiceDetail('${s.id}')">
+            <div class="card-header">
+              <div>
+                <div class="card-title">${esc(s.name)}</div>
+                <div class="card-code">${esc(s.code)}</div>
+              </div>
+              ${statusBadge(s.availabilityStatus)}
+            </div>
+            <div class="card-desc">${esc(s.shortDescription)}</div>
+            <div class="card-footer">
+              ${formatPrice(s.price, s.currency)}
+              ${s.durationMinutes ? `<span style="font-size:.8rem;color:var(--gray-400)">⏱ ${s.durationMinutes} min</span>` : ""}
+            </div>
+          </div>
+        `).join("");
+      }
+
+      // Search / filter
+      let filterDebounce;
+      document.getElementById("svc-search").addEventListener("input", applyServiceFilters);
+      document.getElementById("svc-status").addEventListener("change", applyServiceFilters);
+
+      function applyServiceFilters() {
+        clearTimeout(filterDebounce);
+        filterDebounce = setTimeout(() => {
+          const q      = document.getElementById("svc-search").value.toLowerCase();
+          const status = document.getElementById("svc-status").value;
+          const filtered = allServices.filter(s => {
+            const matchQ = !q || s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q)
+                              || s.shortDescription.toLowerCase().includes(q);
+            const matchS = !status || s.availabilityStatus === status;
+            return matchQ && matchS;
+          });
+          renderServicesGrid(filtered);
+        }, 200);
+      }
+
+      // ─────────────────────────────────────────
+      //  SERVICES — DETAIL
+      // ─────────────────────────────────────────
+      async function openServiceDetail(id) {
+        showView("service-detail");
+        const container = document.getElementById("service-detail-content");
+        container.innerHTML = loading();
+        try {
+          const json = await apiFetch(`/medical-services/${id}`);
+          const s = json.data ?? json;
+          renderServiceDetail(s, container);
+        } catch (e) {
+          container.innerHTML = errorBox("No se pudo cargar el detalle del servicio.");
+        }
+      }
+
+      function renderServiceDetail(s, container) {
+        const specialtyPills = (s.specialtyIds || []).map(sid => {
+          const sp = allSpecialties.find(x => x.id === sid);
+          const label = sp ? esc(sp.name) : sid;
+          return `<span class="pill" onclick="openSpecialtyDetail('${sid}')">${label}</span>`;
+        }).join("") || "<span style='color:var(--gray-400);font-size:.85rem'>Sin especialidades asignadas</span>";
+
+        const requirements = (s.preparationRequirements || []);
+        const tags = (s.tags || []);
+
+        container.innerHTML = `
+          <div class="detail-hero">
+            <div class="detail-hero-left">
+              <div class="detail-title">${esc(s.name)}</div>
+              <div class="detail-code">${esc(s.code)}</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+                ${statusBadge(s.availabilityStatus)}
+                ${activeBadge(s.isActive)}
+              </div>
+            </div>
+            <div class="detail-hero-right">
+              <div class="detail-price">${Number(s.price).toLocaleString("es-GT", { minimumFractionDigits: 2 })} <span>${s.currency || "GTQ"}</span></div>
+              ${s.durationMinutes ? `<span style="font-size:.85rem;color:var(--gray-400)">⏱ ${s.durationMinutes} min estimados</span>` : ""}
+            </div>
+          </div>
+
+          <div class="detail-body">
+            <div>
+              <div class="detail-section-title">Descripción breve</div>
+              <p class="detail-text">${esc(s.shortDescription)}</p>
+            </div>
+
+            ${s.technicalDescription ? `
+            <div>
+              <div class="detail-section-title">Descripción técnica</div>
+              <p class="detail-text">${esc(s.technicalDescription)}</p>
+            </div>` : ""}
+
+            <div class="detail-grid">
+              <div class="detail-stat">
+                <div class="detail-stat-label">Precio</div>
+                <div class="detail-stat-value">${Number(s.price).toLocaleString("es-GT", { minimumFractionDigits: 2 })} ${s.currency || "GTQ"}</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-label">Duración estimada</div>
+                <div class="detail-stat-value">${s.durationMinutes ? s.durationMinutes + " min" : "—"}</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-label">Disponibilidad</div>
+                <div class="detail-stat-value">${statusLabel(s.availabilityStatus)}</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-label">Estado</div>
+                <div class="detail-stat-value">${s.isActive ? "Activo" : "Inactivo"}</div>
+              </div>
+            </div>
+
+            ${requirements.length ? `
+            <div>
+              <div class="detail-section-title">Requisitos de preparación</div>
+              <ul style="padding-left:20px;display:flex;flex-direction:column;gap:6px">
+                ${requirements.map(r => `<li class="detail-text">${esc(r)}</li>`).join("")}
+              </ul>
+            </div>` : ""}
+
+            <div>
+              <div class="detail-section-title">Especialidades relacionadas</div>
+              <div class="pill-list">${specialtyPills}</div>
+            </div>
+
+            ${tags.length ? `
+            <div>
+              <div class="detail-section-title">Etiquetas</div>
+              <div class="tags">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+            </div>` : ""}
+          </div>
+        `;
+      }
+
+      // ─────────────────────────────────────────
+      //  SPECIALTIES — LIST
+      // ─────────────────────────────────────────
+      async function loadSpecialties() {
+        const grid = document.getElementById("specialties-grid");
+        grid.innerHTML = loading();
+        try {
+          const json = await apiFetch("/especialidades");
+          allSpecialties = json.data ?? [];
+          renderSpecialtiesGrid(allSpecialties);
+        } catch (e) {
+          grid.innerHTML = errorBox("No se pudo cargar las especialidades. Verifica que el gateway esté activo.");
+        }
+      }
+
+      function renderSpecialtiesGrid(specialties) {
+        const grid  = document.getElementById("specialties-grid");
+        const count = document.getElementById("specialties-count");
+        count.textContent = `${specialties.length} especialidad${specialties.length !== 1 ? "es" : ""}`;
+
+        if (!specialties.length) {
+          grid.innerHTML = emptyBox("No hay especialidades registradas.");
+          return;
+        }
+
+        grid.innerHTML = specialties.map(sp => `
+          <div class="card" onclick="openSpecialtyDetail('${sp.id}')">
+            <div class="card-header">
+              <div>
+                <div class="card-title">${esc(sp.name)}</div>
+                <div class="card-code">${esc(sp.code)}</div>
+              </div>
+              ${activeBadge(sp.isActive)}
+            </div>
+            <div class="card-desc">${esc(sp.description)}</div>
+            <div class="card-footer">
+              <span style="font-size:.8rem;color:var(--gray-400)">
+                ${(sp.serviceIds || []).length} servicio${(sp.serviceIds || []).length !== 1 ? "s" : ""} asociado${(sp.serviceIds || []).length !== 1 ? "s" : ""}
+              </span>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      // ─────────────────────────────────────────
+      //  SPECIALTIES — DETAIL
+      // ─────────────────────────────────────────
+      async function openSpecialtyDetail(id) {
+        // Switch nav tab if needed
+        document.querySelectorAll(".nav-tab").forEach(b => {
+          b.classList.toggle("active", b.dataset.tab === "specialties");
+        });
+        currentTab = "specialties";
+
+        showView("specialty-detail");
+        const container = document.getElementById("specialty-detail-content");
+        container.innerHTML = loading();
+        try {
+          const json = await apiFetch(`/especialidades/${id}`);
+          const sp = json.data ?? json;
+          // Ensure specialties list is loaded for cross-link
+          if (!allSpecialties.length) {
+            const all = await apiFetch("/especialidades");
+            allSpecialties = all.data ?? [];
+          }
+          renderSpecialtyDetail(sp, container);
+        } catch (e) {
+          container.innerHTML = errorBox("No se pudo cargar el detalle de la especialidad.");
+        }
+      }
+
+      async function renderSpecialtyDetail(sp, container) {
+        // Fetch related services if needed
+        let relatedServices = [];
+        const serviceIds = sp.serviceIds || [];
+        if (serviceIds.length && allServices.length) {
+          relatedServices = allServices.filter(s => serviceIds.includes(s.id));
+        } else if (serviceIds.length) {
+          try {
+            const json = await apiFetch("/medical-services?pageSize=100");
+            allServices = json.data?.items ?? json.data ?? [];
+            relatedServices = allServices.filter(s => serviceIds.includes(s.id));
+          } catch (_) {}
+        }
+
+        const relatedHtml = relatedServices.length
+          ? `<div class="related-list">${relatedServices.map(s => `
+              <div class="related-item" onclick="openServiceDetail('${s.id}'); switchToServiceTab()">
+                <span class="related-item-name">${esc(s.name)}</span>
+                <span class="related-item-price">${Number(s.price).toLocaleString("es-GT", { minimumFractionDigits: 2 })} ${s.currency || "GTQ"}</span>
+              </div>`).join("")}
+            </div>`
+          : serviceIds.length
+            ? `<p class="detail-text" style="color:var(--gray-400)">Información de servicios no disponible.</p>`
+            : `<p class="detail-text" style="color:var(--gray-400)">Sin servicios asociados.</p>`;
+
+        container.innerHTML = `
+          <div class="detail-hero">
+            <div class="detail-hero-left">
+              <div class="detail-title">${esc(sp.name)}</div>
+              <div class="detail-code">${esc(sp.code)}</div>
+              <div style="margin-top:4px">${activeBadge(sp.isActive)}</div>
+            </div>
+            <div class="detail-hero-right">
+              <span style="font-size:.9rem;color:var(--gray-400)">${serviceIds.length} servicio${serviceIds.length !== 1 ? "s" : ""} asociado${serviceIds.length !== 1 ? "s" : ""}</span>
+            </div>
+          </div>
+
+          <div class="detail-body">
+            <div>
+              <div class="detail-section-title">Descripción</div>
+              <p class="detail-text">${esc(sp.description)}</p>
+            </div>
+
+            <div class="detail-grid">
+              <div class="detail-stat">
+                <div class="detail-stat-label">Código</div>
+                <div class="detail-stat-value" style="font-family:monospace;font-size:.9rem">${esc(sp.code)}</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-label">Estado</div>
+                <div class="detail-stat-value">${sp.isActive ? "Activo" : "Inactivo"}</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-label">Creado</div>
+                <div class="detail-stat-value">${formatDate(sp.createdAt)}</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-label">Actualizado</div>
+                <div class="detail-stat-value">${formatDate(sp.updatedAt)}</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="detail-section-title">Servicios médicos de esta especialidad</div>
+              ${relatedHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      function switchToServiceTab() {
+        document.querySelectorAll(".nav-tab").forEach(b => {
+          b.classList.toggle("active", b.dataset.tab === "services");
+        });
+        currentTab = "services";
+      }
+
+      // ─────────────────────────────────────────
+      //  UTIL
+      // ─────────────────────────────────────────
+      function esc(str) {
+        if (str == null) return "";
+        return String(str)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      }
+
+      function statusLabel(s) {
+        return { available: "Disponible", limited: "Limitado", unavailable: "No disponible" }[s] || s;
+      }
+
+      function formatDate(iso) {
+        if (!iso) return "—";
+        try {
+          return new Date(iso).toLocaleDateString("es-GT", { day:"2-digit", month:"short", year:"numeric" });
+        } catch (_) { return iso; }
+      }
+
+      // ─────────────────────────────────────────
+      //  BOOT
+      // ─────────────────────────────────────────
+      loadServices();
+    </script>
+  </body>
 </html>
