@@ -1,0 +1,9 @@
+services:
+  servicios-medicos:
+    image: pascualitzep/serviciosmedicosprac2:1.0
+    container_name: servicios-medicos
+    restart: unless-stopped
+    env_file:
+      - /opt/ayd2/env/servicios-medicos.env
+    ports:
+      - "3001:3001"

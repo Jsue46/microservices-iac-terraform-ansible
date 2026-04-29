@@ -1,0 +1,9 @@
+services:
+  especialidades:
+    image: pascualitzep/especialidadesprac2:1.0
+    container_name: especialidades
+    restart: unless-stopped
+    env_file:
+      - /opt/ayd2/env/especialidades.env
+    ports:
+      - "3002:3002"

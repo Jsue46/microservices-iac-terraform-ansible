@@ -1,0 +1,103 @@
+---
+- name: Base setup (Docker)
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Docker packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+        update_cache: true
+
+    - name: Enable Docker
+      systemd:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Create deployment folders
+      file:
+        path: "/opt/ayd2/{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - compose
+        - env
+
+- name: Deploy frontend
+  hosts: frontend
+  become: true
+  tasks:
+    - name: Copy compose file
+      copy:
+        src: "{{ playbook_dir }}/compose-frontend.yml"
+        dest: /opt/ayd2/compose/compose-frontend.yml
+        mode: "0644"
+
+    - name: Pull image
+      command: docker-compose -f /opt/ayd2/compose/compose-frontend.yml pull
+
+    - name: Compose up
+      command: docker-compose -f /opt/ayd2/compose/compose-frontend.yml up -d
+
+- name: Deploy gateway
+  hosts: gateway
+  become: true
+  tasks:
+    - name: Copy compose file
+      copy:
+        src: "{{ playbook_dir }}/compose-gateway.yml"
+        dest: /opt/ayd2/compose/compose-gateway.yml
+        mode: "0644"
+
+    - name: Pull image
+      command: docker-compose -f /opt/ayd2/compose/compose-gateway.yml pull
+
+    - name: Compose up
+      command: docker-compose -f /opt/ayd2/compose/compose-gateway.yml up -d
+
+- name: Deploy servicios-medicos
+  hosts: servicios_medicos
+  become: true
+  tasks:
+    - name: Copy env file
+      copy:
+        src: "{{ playbook_dir }}/../../services/servicios-medicos/.env"
+        dest: /opt/ayd2/env/servicios-medicos.env
+        mode: "0644"
+
+    - name: Copy compose file
+      copy:
+        src: "{{ playbook_dir }}/compose-servicios-medicos.yml"
+        dest: /opt/ayd2/compose/compose-servicios-medicos.yml
+        mode: "0644"
+
+    - name: Pull image
+      command: docker-compose -f /opt/ayd2/compose/compose-servicios-medicos.yml pull
+
+    - name: Compose up
+      command: docker-compose -f /opt/ayd2/compose/compose-servicios-medicos.yml up -d
+
+- name: Deploy especialidades
+  hosts: especialidades
+  become: true
+  tasks:
+    - name: Copy env file
+      copy:
+        src: "{{ playbook_dir }}/../../services/especialidades/.env"
+        dest: /opt/ayd2/env/especialidades.env
+        mode: "0644"
+
+    - name: Copy compose file
+      copy:
+        src: "{{ playbook_dir }}/compose-especialidades.yml"
+        dest: /opt/ayd2/compose/compose-especialidades.yml
+        mode: "0644"
+
+    - name: Pull image
+      command: docker-compose -f /opt/ayd2/compose/compose-especialidades.yml pull
+
+    - name: Compose up
+      command: docker-compose -f /opt/ayd2/compose/compose-especialidades.yml up -d

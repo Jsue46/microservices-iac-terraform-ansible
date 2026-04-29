@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>AYD2 Práctica 2 - Catálogo</title>
+		<style>
+			body {
+				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+				max-width: 960px;
+				margin: 32px auto;
+				padding: 0 20px;
+				color: #1f2937;
+			}
+
+			h1 {
+				margin-bottom: 8px;
+			}
+
+			.hint {
+				color: #6b7280;
+				margin-bottom: 24px;
+			}
+
+			.actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 12px;
+				margin-bottom: 20px;
+			}
+
+			button {
+				border: none;
+				border-radius: 8px;
+				padding: 12px 18px;
+				background: #2563eb;
+				color: #fff;
+				font-weight: 600;
+				cursor: pointer;
+			}
+
+			button.secondary {
+				background: #10b981;
+			}
+
+			pre {
+				background: #111827;
+				color: #e5e7eb;
+				padding: 16px;
+				border-radius: 12px;
+				min-height: 200px;
+				overflow: auto;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Prueba rápida de endpoints</h1>
+		<p class="hint">
+			Botones para validar los endpoints reales del proyecto. Ajusta la variable
+			<strong>GATEWAY_BASE_URL</strong> si cambias el puerto/IP del gateway.
+		</p>
+
+		<div class="actions">
+			<button id="btn-medicos">Servicios médicos</button>
+			<button id="btn-especialidades" class="secondary">Especialidades</button>
+		</div>
+
+		<pre id="output">Selecciona un endpoint para consultar.</pre>
+
+		<script>
+			const GATEWAY_BASE_URL = "http://136.115.185.115:3000";
+			const MEDICOS_ENDPOINT = `${GATEWAY_BASE_URL}/api/v1/medical-services`;
+			const ESPECIALIDADES_ENDPOINT = `${GATEWAY_BASE_URL}/api/v1/especialidades`;
+
+			const output = document.getElementById("output");
+
+			async function callEndpoint(url) {
+				output.textContent = "Consultando...";
+				try {
+					const response = await fetch(url);
+					const body = await response.text();
+					output.textContent = `Status: ${response.status}\n${body}`;
+				} catch (error) {
+					output.textContent = `Error: ${error.message}`;
+				}
+			}
+
+			document.getElementById("btn-medicos").addEventListener("click", () => {
+				callEndpoint(MEDICOS_ENDPOINT);
+			});
+
+			document.getElementById("btn-especialidades").addEventListener("click", () => {
+				callEndpoint(ESPECIALIDADES_ENDPOINT);
+			});
+		</script>
+	</body>
+</html>

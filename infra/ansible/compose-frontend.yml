@@ -1,0 +1,7 @@
+services:
+  frontend:
+    image: pascualitzep/frontendprac2:1.0
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
