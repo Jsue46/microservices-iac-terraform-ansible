@@ -5,6 +5,16 @@ output "public_ips" {
   }
 }
 
+output "load_balancer_ip" {
+  description = "Global public IP of the external HTTP load balancer."
+  value       = try(google_compute_global_address.load_balancer[0].address, null)
+}
+
+output "load_balancer_url" {
+  description = "Base URL served by the external HTTP load balancer."
+  value       = try("http://${google_compute_global_address.load_balancer[0].address}", null)
+}
+
 output "private_ips" {
   description = "Private IPs for each GCE node inside the VPC subnet."
   value = {

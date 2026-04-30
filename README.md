@@ -9,8 +9,6 @@
 **Facultad:** Ingenieria  
 **Universidad:** Universidad de San Carlos de Guatemala
 
----
-
 ## Integrantes
 
 | No. | Integrante | Carnet |
@@ -21,131 +19,53 @@
 | 4 | Juan Pascual Itzep Coguox | 202202161 |
 | 5 | Sergio Sebastian Sandoval Ruiz | 202010298 |
 
----
+## Resumen
 
-## Descripcion
+Este repositorio contiene la solucion de la practica enfocada en una plataforma web
+para catalogo de servicios medicos, implementada con arquitectura de microservicios,
+API Gateway, frontend web y automatizacion de despliegue con Terraform y Ansible.
 
-Este repositorio contiene el desarrollo de la Practica 2 del curso Analisis y Diseno de
-Sistemas 2. La practica consiste en construir una plataforma web para la gestion de
-servicios medicos, utilizando una arquitectura basada en microservicios y un enfoque de
-Infraestructura como Codigo con Terraform y Ansible.
+Actualmente el proyecto incluye:
 
-La solucion contempla un frontend, un gateway como punto de entrada, dos
-microservicios principales y la automatizacion del despliegue en nube.
+- `frontend` con interfaz para consultar servicios y especialidades.
+- `gateway` como punto de entrada unico para las APIs.
+- `services/servicios-medicos` con soporte de persistencia en memoria o PostgreSQL.
+- `services/especialidades` con soporte de persistencia en memoria o PostgreSQL.
+- `infra/terraform` para red, VMs y Cloud SQL en GCP.
+- `infra/ansible` para despliegue de contenedores e inyeccion de configuracion.
 
----
-
-## Objetivo del repositorio
-
-Centralizar en un solo proyecto:
-
-- El codigo fuente del frontend y de los microservicios.
-- La configuracion del gateway.
-- La infraestructura definida con Terraform.
-- La automatizacion de configuracion y despliegue con Ansible.
-- La documentacion solicitada por el enunciado.
-
----
-
-## Estructura actual del proyecto
+## Estructura
 
 ```text
 AYD2_A_2S2026_PRAC2_G6/
 |-- docs/
-|   |-- arquitectura-despliegue.md
-|   |-- enunciado_extraido.txt
-|   |-- manual-usuario.md
-|   `-- Practica 2.docx (1).pdf
 |-- frontend/
-|   |-- Dockerfile
-|   |-- nginx.conf
-|   `-- src/
-|       |-- app.js
-|       `-- index.html
 |-- gateway/
-|   |-- Dockerfile
-|   `-- nginx.conf
 |-- infra/
 |   |-- ansible/
-|   |   |-- ansible.cfg
-|   |   |-- inventory.ini
-|   |   `-- playbook.yml
 |   `-- terraform/
-|       |-- main.tf
-|       |-- outputs.tf
-|       |-- providers.tf
-|       `-- variables.tf
+|-- reference/
 |-- services/
 |   |-- especialidades/
-|   |   |-- Dockerfile
-|   |   |-- package.json
-|   |   `-- src/
-|   |       `-- server.js
 |   `-- servicios-medicos/
-|       |-- .dockerignore
-|       |-- .env.example
-|       |-- Dockerfile
-|       |-- docs/
-|       |   `-- modelo-datos.md
-|       |-- package-lock.json
-|       |-- package.json
-|       |-- README.md
-|       |-- src/
-|       |   |-- app.ts
-|       |   |-- server.ts
-|       |   |-- types.ts
-|       |   |-- config/
-|       |   |   `-- env.ts
-|       |   |-- controllers/
-|       |   |   `-- medicalServiceController.ts
-|       |   |-- data/
-|       |   |   `-- medicalServicesSeed.ts
-|       |   |-- repositories/
-|       |   |   |-- medicalServiceRepository.ts
-|       |   |   `-- postgresMedicalServiceRepository.ts
-|       |   |-- routes/
-|       |   |   `-- medicalServiceRouter.ts
-|       |   |-- services/
-|       |   |   `-- medicalServiceService.ts
-|       |   |-- utils/
-|       |   |   `-- http.ts
-|       |-- tests/
-|       |   `-- run-smoke-tests.ts
-|       `-- tsconfig.json
 |-- docker-compose.yml
 `-- README.md
 ```
 
----
-
-## Correspondencia con el enunciado
-
-- `frontend/`: interfaz web para consultar especialidades y servicios medicos.
-- `gateway/`: punto de entrada al sistema y capa de enrutamiento.
-- `services/servicios-medicos/`: microservicio encargado del catalogo de servicios.
-- `services/especialidades/`: microservicio encargado del catalogo de especialidades.
-- `infra/terraform/`: aprovisionamiento de infraestructura en nube.
-- `infra/ansible/`: configuracion del entorno y despliegue automatizado.
-- `docs/`: documentacion tecnica y manuales requeridos en la practica.
-
----
-
 ## Estado actual
 
-El repositorio se encuentra en fase de estructura base. La organizacion de carpetas ya
-responde a los componentes principales del enunciado y servira como esqueleto para la
-implementacion del sistema, la infraestructura y la documentacion final.
-
----
+La solucion ya cuenta con implementacion funcional de frontend, gateway,
+microservicios, contenedores, documentacion tecnica y automatizacion de despliegue.
+La configuracion de `frontend` y `gateway` fue ajustada para no depender de IPs
+hardcodeadas dentro de las imagenes.
 
 ## Documentacion principal
 
 - [Arquitectura de despliegue](./docs/arquitectura-despliegue.md)
 - [Manual de usuario](./docs/manual-usuario.md)
-
-- [FASE_2/frontend/README.md](./FASE_2/frontend/README.md)
-
----
+- [Microservicio de Servicios Medicos](./services/servicios-medicos/README.md)
+- [Microservicio de Especialidades](./services/especialidades/README.md)
+- [Terraform en GCP](./infra/terraform/README.md)
 
 ## Convencion de commits
 

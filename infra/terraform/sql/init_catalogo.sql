@@ -110,22 +110,27 @@ INSERT INTO public.specialties (
   (
     'cardiologia', 'CARD-001', 'Cardiologia',
     'Especialidad medica enfocada en el diagnostico y tratamiento de enfermedades del corazon.',
-    TRUE, ARRAY['svc-001', 'svc-002'], NOW(), NOW()
+    TRUE, ARRAY['svc-001'], NOW(), NOW()
   ),
   (
     'pediatria', 'PED-001', 'Pediatria',
     'Especialidad dedicada a la salud y enfermedades de ninos y adolescentes.',
-    TRUE, ARRAY['svc-003'], NOW(), NOW()
+    TRUE, ARRAY['svc-002'], NOW(), NOW()
   ),
   (
     'laboratorio-clinico', 'LAB-001', 'Laboratorio Clinico',
     'Servicios de analisis clinicos y estudios de laboratorio.',
-    TRUE, ARRAY['svc-004', 'svc-005'], NOW(), NOW()
+    TRUE, ARRAY['svc-003', 'svc-006'], NOW(), NOW()
   ),
   (
     'radiologia', 'RAD-001', 'Radiologia',
     'Especialidad de diagnostico por imagen.',
-    TRUE, ARRAY['svc-006'], NOW(), NOW()
+    TRUE, ARRAY['svc-004'], NOW(), NOW()
+  ),
+  (
+    'ginecologia', 'GINE-001', 'Ginecologia',
+    'Especialidad enfocada en la salud integral de la mujer y el control preventivo ginecologico.',
+    TRUE, ARRAY['svc-005'], NOW(), NOW()
   )
 ON CONFLICT (id) DO UPDATE SET
   code = EXCLUDED.code,

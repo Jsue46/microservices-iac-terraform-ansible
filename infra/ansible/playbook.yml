@@ -30,6 +30,12 @@
   hosts: frontend
   become: true
   tasks:
+    - name: Copy env file
+      copy:
+        src: "{{ playbook_dir }}/../../frontend/.env"
+        dest: /opt/ayd2/env/frontend.env
+        mode: "0644"
+
     - name: Copy compose file
       copy:
         src: "{{ playbook_dir }}/compose-frontend.yml"
@@ -46,6 +52,12 @@
   hosts: gateway
   become: true
   tasks:
+    - name: Copy env file
+      copy:
+        src: "{{ playbook_dir }}/../../gateway/.env"
+        dest: /opt/ayd2/env/gateway.env
+        mode: "0644"
+
     - name: Copy compose file
       copy:
         src: "{{ playbook_dir }}/compose-gateway.yml"

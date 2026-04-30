@@ -1,7 +1,9 @@
 services:
   frontend:
-    image: pascualitzep/frontendprac2:2.0
+    image: pascualitzep/frontendprac2:2.1
     container_name: frontend
     restart: unless-stopped
+    env_file:
+      - /opt/ayd2/env/frontend.env
     ports:
       - "80:80"

@@ -3,8 +3,7 @@
 ## Descripcion
 
 Este documento resume el modelo de datos del microservicio de Especialidades para
-su capa de persistencia en memoria, con estructura preparada para una futura
-integracion con base de datos desacoplada.
+su capa de persistencia, disponible tanto en memoria como en PostgreSQL.
 
 ## Tabla logica
 
@@ -34,7 +33,7 @@ Ejemplo de relacion:
 
 ```
 Especialidad cardiologia
-  serviceIds: ["svc-001", "svc-002"]
+  serviceIds: ["svc-001"]
 
 Servicio svc-001
   specialtyIds: ["cardiologia"]
@@ -42,7 +41,7 @@ Servicio svc-001
 
 ## Datos semilla
 
-El microservicio inicia con 4 especialidades predefinidas:
+El microservicio inicia con 5 especialidades predefinidas:
 
 | id | code | name |
 |---|---|---|
@@ -50,10 +49,12 @@ El microservicio inicia con 4 especialidades predefinidas:
 | `pediatria` | `PED-001` | Pediatria |
 | `laboratorio-clinico` | `LAB-001` | Laboratorio Clinico |
 | `radiologia` | `RAD-001` | Radiologia |
+| `ginecologia` | `GINE-001` | Ginecologia |
 
 ## Notas importantes
 
-- La persistencia actual es en memoria; los datos se reinician al reiniciar el servicio.
-- El microservicio no requiere base de datos externa para ejecutarse.
+- El servicio puede ejecutarse en `memory` o `postgres` segun `PERSISTENCE_MODE`.
+- En modo `memory`, los datos se reinician al reiniciar el servicio.
+- En modo `postgres`, la tabla usada es `public.specialties` o `${DATABASE_SCHEMA}.specialties`.
 - Los `id` de las especialidades semilla coinciden con los `specialtyIds` usados
   en los datos semilla del microservicio de Servicios Medicos.

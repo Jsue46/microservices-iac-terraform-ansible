@@ -10,7 +10,8 @@ locals {
     "app"
   ])
 
-  compute_nodes = var.deployment_mode == "full" ? local.full_compute_nodes : local.free_tier_compute_nodes
+  compute_nodes         = var.deployment_mode == "full" ? local.full_compute_nodes : local.free_tier_compute_nodes
+  load_balancer_enabled = var.create_load_balancer && var.deployment_mode == "full"
 
   common_labels = merge(
     {
@@ -84,6 +85,20 @@ resource "google_compute_firewall" "allow_web" {
   target_tags   = ["${var.project_name}-node"]
 }
 
+resource "google_compute_firewall" "allow_lb_health_checks" {
+  count   = local.load_balancer_enabled ? 1 : 0
+  name    = "${var.project_name}-${var.environment}-allow-lb-health-checks"
+  network = google_compute_network.main.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "3000"]
+  }
+
+  source_ranges = ["35.191.0.0/16", "130.211.0.0/22"]
+  target_tags   = ["${var.project_name}-node"]
+}
+
 resource "google_compute_address" "compute" {
   for_each = var.create_static_ips ? local.compute_nodes : toset([])
 
@@ -123,6 +138,129 @@ resource "google_compute_instance" "compute" {
   labels = merge(local.common_labels, {
     role = replace(each.key, "-", "_")
   })
+}
+
+resource "google_compute_instance_group" "frontend" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name      = "${var.project_name}-${var.environment}-frontend-ig"
+  zone      = var.gcp_zone
+  instances = [google_compute_instance.compute["frontend"].id]
+
+  named_port {
+    name = "http"
+    port = 80
+  }
+}
+
+resource "google_compute_instance_group" "gateway" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name      = "${var.project_name}-${var.environment}-gateway-ig"
+  zone      = var.gcp_zone
+  instances = [google_compute_instance.compute["gateway"].id]
+
+  named_port {
+    name = "http"
+    port = 3000
+  }
+}
+
+resource "google_compute_health_check" "frontend" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name = "${var.project_name}-${var.environment}-frontend-hc"
+
+  http_health_check {
+    port         = 80
+    request_path = "/"
+  }
+}
+
+resource "google_compute_health_check" "gateway" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name = "${var.project_name}-${var.environment}-gateway-hc"
+
+  http_health_check {
+    port         = 3000
+    request_path = "/health"
+  }
+}
+
+resource "google_compute_backend_service" "frontend" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name                  = "${var.project_name}-${var.environment}-frontend-backend"
+  protocol              = "HTTP"
+  port_name             = "http"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  timeout_sec           = 30
+  health_checks         = [google_compute_health_check.frontend[0].id]
+
+  backend {
+    group = google_compute_instance_group.frontend[0].id
+  }
+}
+
+resource "google_compute_backend_service" "gateway" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name                  = "${var.project_name}-${var.environment}-gateway-backend"
+  protocol              = "HTTP"
+  port_name             = "http"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  timeout_sec           = 30
+  health_checks         = [google_compute_health_check.gateway[0].id]
+
+  backend {
+    group = google_compute_instance_group.gateway[0].id
+  }
+}
+
+resource "google_compute_url_map" "main" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name            = "${var.project_name}-${var.environment}-url-map"
+  default_service = google_compute_backend_service.frontend[0].id
+
+  path_matcher {
+    name            = "app-routes"
+    default_service = google_compute_backend_service.frontend[0].id
+
+    path_rule {
+      paths   = ["/api", "/api/*", "/health", "/health/*"]
+      service = google_compute_backend_service.gateway[0].id
+    }
+  }
+
+  host_rule {
+    hosts        = ["*"]
+    path_matcher = "app-routes"
+  }
+}
+
+resource "google_compute_target_http_proxy" "main" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name    = "${var.project_name}-${var.environment}-http-proxy"
+  url_map = google_compute_url_map.main[0].id
+}
+
+resource "google_compute_global_address" "load_balancer" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name = "${var.project_name}-${var.environment}-lb-ip"
+}
+
+resource "google_compute_global_forwarding_rule" "http" {
+  count = local.load_balancer_enabled ? 1 : 0
+
+  name                  = "${var.project_name}-${var.environment}-http-forwarding-rule"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  target                = google_compute_target_http_proxy.main[0].id
+  ip_address            = google_compute_global_address.load_balancer[0].address
+  port_range            = "80"
 }
 
 resource "google_sql_database_instance" "postgres" {

@@ -13,6 +13,7 @@ environment          = "dev"
 deployment_mode      = "free-tier"
 create_cloud_sql     = false
 create_static_ips    = false
+create_load_balancer = false
 
 # Seguridad SSH (recomendado usar tu IP publica/32)
 allowed_ssh_cidr     = "0.0.0.0/0"
@@ -45,3 +46,4 @@ cloud_sql_authorized_cidrs = ["0.0.0.0/0"]
 # deployment_mode   = "full"
 # create_cloud_sql  = true
 # create_static_ips = true
+# create_load_balancer = true

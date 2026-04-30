@@ -7,9 +7,10 @@ Su responsabilidad principal es exponer endpoints para consultar, crear, actuali
 eliminar especialidades, incluyendo nombre, descripcion, estado y referencias a los
 servicios medicos que agrupa.
 
-La implementacion usa persistencia en memoria, lo que permite ejecutarse localmente
-sin dependencias externas y quedar listo para integracion con el resto de la
-arquitectura.
+La implementacion soporta dos modos de persistencia:
+
+- `memory`: pensado para desarrollo local y pruebas rapidas.
+- `postgres`: pensado para despliegue e integracion con una base de datos gestionada.
 
 ## Responsabilidad dentro del proyecto
 
@@ -68,6 +69,10 @@ services/especialidades/
 | `HOST` | Host donde escucha el servidor | `0.0.0.0` |
 | `SERVICE_NAME` | Nombre logico del servicio | `especialidades` |
 | `API_PREFIX` | Prefijo base de la API | `/api/v1` |
+| `PERSISTENCE_MODE` | Modo de persistencia: `memory` o `postgres` | `memory` |
+| `DATABASE_URL` | Cadena de conexion PostgreSQL | No aplica |
+| `DATABASE_SSL` | Define si la conexion PostgreSQL usa SSL | `false` |
+| `DATABASE_SCHEMA` | Esquema de base de datos a utilizar | `public` |
 
 Archivo de ejemplo:
 
@@ -117,6 +122,16 @@ Con variables de entorno:
 
 ```bash
 docker run --rm -p 3002:3002 -e PORT=3002 -e HOST=0.0.0.0 especialidades
+```
+
+Con base de datos PostgreSQL:
+
+```bash
+docker run --rm -p 3002:3002 \
+  -e PERSISTENCE_MODE=postgres \
+  -e DATABASE_URL=postgresql://usuario:clave@host:5432/catalogo \
+  -e DATABASE_SSL=false \
+  especialidades
 ```
 
 ## Contrato HTTP
@@ -201,7 +216,7 @@ docker run --rm -p 3002:3002 -e PORT=3002 -e HOST=0.0.0.0 especialidades
 {
   "success": true,
   "data": [...],
-  "meta": { "total": 4 }
+  "meta": { "total": 5 }
 }
 ```
 
@@ -251,4 +266,8 @@ Requiere el objeto completo excepto `id`, `createdAt` y `updatedAt`.
 - El frontend puede listar especialidades y usarlas para filtrar servicios medicos por `specialtyId`.
 - El microservicio de Servicios Medicos usa los `id` de las especialidades en su campo `specialtyIds`.
 - Los datos semilla de ambos microservicios estan sincronizados por `id`.
-- Mientras no exista base de datos, los datos se reinician al reiniciar el servicio.
+- `ginecologia` se incluye como quinta especialidad semilla para mantener consistencia
+  con el servicio `svc-005`.
+- En modo `memory`, los datos se reinician al reiniciar el servicio.
+- En modo `postgres`, el servicio crea la tabla `specialties` si no existe y reutiliza
+  los registros persistidos en Cloud SQL o PostgreSQL.

@@ -28,8 +28,11 @@ No incluye frontend ni logica del microservicio de Especialidades.
 
 ## Documentacion complementaria
 
-- [Integracion con API Gateway](./INTEGRACION_GATEWAY.md)
 - [Modelo de datos](./docs/modelo-datos.md)
+
+La integracion con el API Gateway se realiza usando el prefijo
+`/api/v1/medical-services`, ya sea a traves de Docker Compose local o del despliegue
+en nube configurado con Ansible.
 
 ## Estructura interna
 

@@ -1,7 +1,9 @@
 services:
   gateway:
-    image: pascualitzep/gatewayprac2:1.0
+    image: pascualitzep/gatewayprac2:1.1
     container_name: gateway
     restart: unless-stopped
+    env_file:
+      - /opt/ayd2/env/gateway.env
     ports:
       - "3000:80"

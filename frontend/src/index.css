@@ -1,0 +1,106 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500;700&family=DM+Sans:opsz,wght@9..40,100..1000&family=Syne:wght@400..800&display=swap");
+@import "tailwindcss";
+
+:root {
+  --dark: #0b1620;
+  --dark-2: #10202d;
+  --light: #f7f8f6;
+  --light-2: #eef3ef;
+  --light-3: #f2f6f2;
+  --white: #ffffff;
+  --teal: #1f6f78;
+  --teal-hover: #165861;
+  --teal-deep: #133f47;
+  --teal-light: #e2f0f1;
+  --teal-soft: #d7ebee;
+  --sage: #a8c4bd;
+  --sand: #b48254;
+  --sand-light: #f3e5d8;
+  --text-dark: #132028;
+  --text-mid: #5a6b72;
+  --text-muted: #85959b;
+}
+
+@theme {
+  --color-dark: var(--dark);
+  --color-dark-2: var(--dark-2);
+  --color-light: var(--light);
+  --color-light-2: var(--light-2);
+  --color-light-3: var(--light-3);
+  --color-teal: var(--teal);
+  --color-teal-hover: var(--teal-hover);
+  --color-teal-deep: var(--teal-deep);
+  --color-teal-light: var(--teal-light);
+  --color-teal-soft: var(--teal-soft);
+  --color-sage: var(--sage);
+  --color-sand: var(--sand);
+  --color-sand-light: var(--sand-light);
+  --color-text-dark: var(--text-dark);
+  --color-text-mid: var(--text-mid);
+  --color-text-muted: var(--text-muted);
+
+  --font-syne: "Syne", sans-serif;
+  --font-dm-sans: "DM Sans", sans-serif;
+  --font-dm-mono: "DM Mono", monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(168, 196, 189, 0.18), transparent 24%),
+    radial-gradient(circle at top right, rgba(180, 130, 84, 0.09), transparent 26%),
+    linear-gradient(180deg, #f7f8f6 0%, #eef3ef 100%);
+  color: var(--text-dark);
+  font-family: var(--font-dm-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(31, 111, 120, 0.16);
+  color: var(--text-dark);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-syne);
+  font-weight: 700;
+}
+
+.page-transition {
+  animation: page-in 0.28s ease-out both;
+}
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.82));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.clinical-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(10px);
+  opacity: 0.88;
+  pointer-events: none;
+}
+
+@keyframes page-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

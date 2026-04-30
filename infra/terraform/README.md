@@ -8,6 +8,7 @@ Este modulo aprovisiona en Google Cloud Platform la infraestructura base para la
 - VMs en Compute Engine
 - IP publica por VM (ephemeral por defecto o estatica opcional)
 - Cloud SQL PostgreSQL opcional
+- Balanceador HTTP externo opcional para publicar frontend y gateway con una sola IP
 
 ## Modo recomendado para no pagar
 
@@ -16,6 +17,7 @@ Valores por defecto en `terraform.tfvars`:
 - `deployment_mode = "free-tier"` (solo 1 VM)
 - `create_cloud_sql = false`
 - `create_static_ips = false`
+- `create_load_balancer = false`
 
 Con esto minimizas costos y puedes validar tu parte de Terraform sin desplegar arquitectura completa.
 
@@ -106,9 +108,30 @@ Si necesitas demostrar todo el enunciado en GCP:
 - `deployment_mode = "full"` (4 VMs)
 - `create_static_ips = true` (IPs reservadas)
 - `create_cloud_sql = true` (DB gestionada)
+- `create_load_balancer = true` (IP publica unica con ruteo a frontend y gateway)
 - `db_password` con al menos 8 caracteres
 
 Esto puede generar costo. Haz demo y luego `terraform destroy` el mismo dia.
+
+## Balanceador de carga
+
+Cuando usas:
+
+- `deployment_mode = "full"`
+- `create_load_balancer = true`
+
+Terraform crea un balanceador HTTP externo administrado con estas rutas:
+
+- `/` hacia `frontend` en puerto `80`
+- `/api` y `/api/*` hacia `gateway` en puerto `3000`
+- `/health` y `/health/*` hacia `gateway` en puerto `3000`
+
+Para ver la IP publica:
+
+```powershell
+terraform output load_balancer_ip
+terraform output load_balancer_url
+```
 
 ## Integracion con Ansible
 

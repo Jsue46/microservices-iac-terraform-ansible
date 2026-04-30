@@ -56,6 +56,12 @@ variable "create_static_ips" {
   default     = false
 }
 
+variable "create_load_balancer" {
+  description = "Whether to provision an external HTTP load balancer for frontend and gateway."
+  type        = bool
+  default     = false
+}
+
 variable "vpc_cidr" {
   description = "CIDR range for custom VPC route export metadata."
   type        = string
