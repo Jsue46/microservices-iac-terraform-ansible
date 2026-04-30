@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: pascualitzep/frontendprac2:2.1
+    image: pascualitzep/frontendprac2:5.0
     container_name: frontend
     restart: unless-stopped
     env_file:

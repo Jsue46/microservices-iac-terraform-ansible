@@ -1,6 +1,6 @@
 services:
   gateway:
-    image: pascualitzep/gatewayprac2:1.1
+    image: pascualitzep/gatewayprac2:2.0
     container_name: gateway
     restart: unless-stopped
     env_file:

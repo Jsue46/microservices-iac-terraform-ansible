@@ -1,6 +1,6 @@
 services:
   servicios-medicos:
-    image: pascualitzep/serviciosmedicosprac2:1.0
+    image: pascualitzep/serviciosmedicosprac2:2.0
     container_name: servicios-medicos
     restart: unless-stopped
     env_file:
