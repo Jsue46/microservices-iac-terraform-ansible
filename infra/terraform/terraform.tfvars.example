@@ -40,6 +40,7 @@ db_password          = ""
 cloud_sql_tier       = "db-f1-micro"
 cloud_sql_disk_size_gb = 10
 cloud_sql_version    = "POSTGRES_15"
+cloud_sql_deletion_protection = true
 cloud_sql_authorized_cidrs = ["0.0.0.0/0"]
 
 # Full demo (puede generar costos)

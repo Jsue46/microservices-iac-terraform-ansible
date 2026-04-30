@@ -166,6 +166,12 @@ variable "cloud_sql_version" {
   default     = "POSTGRES_15"
 }
 
+variable "cloud_sql_deletion_protection" {
+  description = "Whether Terraform should keep Cloud SQL deletion protection enabled."
+  type        = bool
+  default     = true
+}
+
 variable "cloud_sql_authorized_cidrs" {
   description = "Authorized CIDRs for Cloud SQL public IP access."
   type        = list(string)

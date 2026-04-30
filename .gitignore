@@ -36,3 +36,4 @@ terraform.tfvars
 
 # Local cloud credentials
 ayd2-494415-3c9dc46a4f5d.json
+infra/terraform/*.json

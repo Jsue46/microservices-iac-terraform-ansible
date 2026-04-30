@@ -135,6 +135,12 @@ resource "google_compute_instance" "compute" {
     ssh-keys = "${var.ansible_user}:${var.ssh_public_key}"
   }
 
+  lifecycle {
+    ignore_changes = [
+      metadata["ssh-keys"]
+    ]
+  }
+
   labels = merge(local.common_labels, {
     role = replace(each.key, "-", "_")
   })
@@ -269,7 +275,7 @@ resource "google_sql_database_instance" "postgres" {
   name                = "${var.project_name}-${var.environment}-postgres"
   region              = var.gcp_region
   database_version    = var.cloud_sql_version
-  deletion_protection = false
+  deletion_protection = var.cloud_sql_deletion_protection
 
   settings {
     tier      = var.cloud_sql_tier
