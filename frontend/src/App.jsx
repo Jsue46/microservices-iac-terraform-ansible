@@ -19,6 +19,14 @@ import {
 
 const API = "/api/v1";
 
+function serviceImageSrc(serviceId) {
+  return `/images/services/${serviceId}.jpg`;
+}
+
+function specialtyImageSrc(specialtyId) {
+  return `/images/specialties/${specialtyId}.jpg`;
+}
+
 function formatCurrency(value, currency = "GTQ") {
   return new Intl.NumberFormat("es-GT", {
     style: "currency",
@@ -78,6 +86,54 @@ function specialtyIcon(specialtyId) {
     default:
       return BriefcaseMedical;
   }
+}
+
+function ImageFrame({
+  src,
+  alt,
+  icon: Icon,
+  accent = "teal",
+  className = "",
+  iconSize = 42,
+  fallbackLabel = "Imagen referencial"
+}) {
+  const [hasError, setHasError] = useState(false);
+  const tint =
+    accent === "sand"
+      ? "from-[#f7efe6] via-[#f6f1ea] to-[#efe3d6] text-sand"
+      : "from-[#e9f4f4] via-[#f6faf9] to-[#dfecee] text-teal";
+
+  if (!src || hasError) {
+    return (
+      <div
+        className={`relative overflow-hidden bg-gradient-to-br ${tint} ${className}`}
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.75),transparent_34%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(19,32,40,0.08),transparent_28%)]" />
+        <div className="relative flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/82 shadow-[0_12px_24px_rgba(17,35,44,0.08)]">
+            <Icon size={iconSize} strokeWidth={1.7} />
+          </div>
+          <span className="font-dm-mono text-[11px] uppercase tracking-[0.18em] text-text-muted">
+            {fallbackLabel}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`relative overflow-hidden bg-[#f5f6f4] ${className}`}>
+      <img
+        src={src}
+        alt={alt}
+        className="h-full w-full object-cover"
+        loading="lazy"
+        onError={() => setHasError(true)}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#132028]/34 via-transparent to-transparent" />
+    </div>
+  );
 }
 
 async function apiFetch(path) {
@@ -481,56 +537,83 @@ function ServiceCard({ service, specialties, onOpen }) {
   return (
     <article
       onClick={onOpen}
-      className="group overflow-hidden rounded-[24px] border border-black/6 bg-white shadow-[0_12px_30px_rgba(17,35,44,0.05)] transition-all hover:-translate-y-[4px] hover:shadow-[0_20px_40px_rgba(17,35,44,0.08)]"
+      className="group overflow-hidden rounded-[30px] border border-black/6 bg-white shadow-[0_14px_34px_rgba(17,35,44,0.06)] transition-all hover:-translate-y-[4px] hover:shadow-[0_24px_46px_rgba(17,35,44,0.10)]"
     >
-      <div className="bg-[linear-gradient(135deg,#f7f8f6,#edf3f1)] p-4">
-        <div className="rounded-[18px] bg-white p-5 shadow-[0_12px_28px_rgba(17,35,44,0.08)]">
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-teal-light text-teal">
-              <Icon size={18} />
-            </div>
-            <div className="flex flex-wrap justify-end gap-2">
-              <span className={`rounded-full px-3 py-1.5 text-xs font-bold ${statusMeta(service.availabilityStatus)}`}>
-                {service.availabilityStatus === "available"
-                  ? "Disponible"
-                  : service.availabilityStatus === "limited"
-                    ? "Limitado"
-                    : "No disponible"}
-              </span>
-              <span className={`rounded-full px-3 py-1.5 text-xs font-bold ${activeMeta(service.isActive)}`}>
-                {service.isActive ? "Activo" : "Inactivo"}
-              </span>
-            </div>
+      <div className="relative isolate">
+        <ImageFrame
+          src={serviceImageSrc(service.id)}
+          alt={service.name}
+          icon={Icon}
+          className="h-64 w-full"
+          fallbackLabel="Imagen clínica"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,20,28,0.10),transparent_28%,rgba(10,20,28,0.34)_100%)]" />
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-white/88 text-teal shadow-[0_10px_24px_rgba(17,35,44,0.10)] backdrop-blur-md">
+            <Icon size={18} />
           </div>
+          <div className="flex flex-wrap justify-end gap-2">
+            <span className={`rounded-full px-3 py-1.5 text-xs font-bold shadow-[0_8px_20px_rgba(17,35,44,0.08)] backdrop-blur-sm ${statusMeta(service.availabilityStatus)}`}>
+              {service.availabilityStatus === "available"
+                ? "Disponible"
+                : service.availabilityStatus === "limited"
+                  ? "Limitado"
+                  : "No disponible"}
+            </span>
+            <span className={`rounded-full px-3 py-1.5 text-xs font-bold shadow-[0_8px_20px_rgba(17,35,44,0.08)] backdrop-blur-sm ${activeMeta(service.isActive)}`}>
+              {service.isActive ? "Activo" : "Inactivo"}
+            </span>
+          </div>
+        </div>
 
-          <p className="mb-2 font-dm-mono text-[11px] uppercase tracking-[0.18em] text-text-muted">
-            {service.code}
-          </p>
-          <h3 className="text-[28px] leading-[1.06] font-bold text-text-dark">{service.name}</h3>
-          <p className="mt-3 text-[15px] leading-[1.75] text-text-mid">{service.shortDescription}</p>
+        <div className="pointer-events-none absolute inset-x-5 bottom-5">
+          <div className="max-w-[82%] rounded-[22px] border border-white/18 bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.08))] p-4 text-white shadow-[0_18px_32px_rgba(5,12,18,0.22)] backdrop-blur-md">
+            <p className="font-dm-mono text-[11px] uppercase tracking-[0.18em] text-white/76">
+              {service.code}
+            </p>
+            <h3 className="mt-2 text-[28px] leading-[0.96] font-bold">
+              {service.name}
+            </h3>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4 p-5">
-        <div className="inline-flex items-center gap-2 rounded-full bg-sand-light px-4 py-2.5 text-sand">
-          <BadgeDollarSign size={15} />
-          <span className="font-dm-mono font-bold">{formatCurrency(service.price, service.currency)}</span>
-        </div>
+      <div className="relative -mt-6 rounded-t-[26px] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),#ffffff)] px-5 pb-5 pt-7">
+        <div className="space-y-5">
+          <div>
+            <p className="text-[15px] leading-[1.8] text-text-mid">
+            {service.shortDescription}
+            </p>
+          </div>
 
-        <div className="flex flex-wrap gap-2">
-          {specialtyLabels.map((specialty) => (
-            <span
-              key={specialty.id}
-              className="rounded-full border border-black/8 bg-[#f7fafb] px-3 py-1.5 text-[12px] font-medium text-text-mid"
-            >
-              {specialty.name}
-            </span>
-          ))}
-        </div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full bg-sand-light px-4 py-2.5 text-sand">
+              <BadgeDollarSign size={15} />
+              <span className="font-dm-mono font-bold">
+                {formatCurrency(service.price, service.currency)}
+              </span>
+            </div>
 
-        <div className="flex items-center justify-between border-t border-black/6 pt-4 text-sm font-bold text-teal">
-          <span>Ver detalle</span>
-          <span className="transition-transform group-hover:translate-x-1">→</span>
+            <div className="text-sm font-medium text-text-muted">
+              {service.durationMinutes} min
+            </div>
+          </div>
+
+          <div className="flex min-h-[34px] flex-wrap gap-2">
+            {specialtyLabels.map((specialty) => (
+              <span
+                key={specialty.id}
+                className="rounded-full border border-black/8 bg-[#f7fafb] px-3 py-1.5 text-[12px] font-medium text-text-mid"
+              >
+                {specialty.name}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between border-t border-black/6 pt-4 text-sm font-bold text-teal">
+            <span>Ver detalle</span>
+            <span className="transition-transform group-hover:translate-x-1">→</span>
+          </div>
         </div>
       </div>
     </article>
@@ -543,36 +626,58 @@ function SpecialtyCard({ specialty, onOpen }) {
   return (
     <article
       onClick={onOpen}
-      className="group overflow-hidden rounded-[24px] border border-black/6 bg-white shadow-[0_12px_30px_rgba(17,35,44,0.05)] transition-all hover:-translate-y-[4px] hover:shadow-[0_20px_40px_rgba(17,35,44,0.08)]"
+      className="group overflow-hidden rounded-[30px] border border-black/6 bg-white shadow-[0_14px_34px_rgba(17,35,44,0.06)] transition-all hover:-translate-y-[4px] hover:shadow-[0_24px_46px_rgba(17,35,44,0.10)]"
     >
-      <div className="bg-[linear-gradient(135deg,#ffffff,#f4f7f3)] p-5">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#f1e3d8] text-sand">
+      <div className="relative isolate">
+        <ImageFrame
+          src={specialtyImageSrc(specialty.id)}
+          alt={specialty.name}
+          icon={Icon}
+          accent="sand"
+          className="h-60 w-full"
+          fallbackLabel="Imagen médica"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,16,12,0.08),transparent_28%,rgba(18,16,12,0.28)_100%)]" />
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-white/88 text-sand shadow-[0_10px_24px_rgba(17,35,44,0.10)] backdrop-blur-md">
             <Icon size={18} />
           </div>
-          <span className={`rounded-full px-3 py-1.5 text-xs font-bold ${activeMeta(specialty.isActive)}`}>
+          <span className={`rounded-full px-3 py-1.5 text-xs font-bold shadow-[0_8px_20px_rgba(17,35,44,0.08)] backdrop-blur-sm ${activeMeta(specialty.isActive)}`}>
             {specialty.isActive ? "Activa" : "Inactiva"}
           </span>
         </div>
 
-        <p className="mb-2 font-dm-mono text-[11px] uppercase tracking-[0.18em] text-text-muted">
-          {specialty.code}
-        </p>
-        <h3 className="text-[28px] leading-[1.06] font-bold text-text-dark">{specialty.name}</h3>
-        <p className="mt-3 text-[15px] leading-[1.75] text-text-mid">{specialty.description}</p>
+        <div className="pointer-events-none absolute inset-x-5 bottom-5">
+          <div className="max-w-[84%] rounded-[22px] border border-white/18 bg-[linear-gradient(180deg,rgba(255,255,255,0.24),rgba(255,255,255,0.10))] p-4 text-white shadow-[0_18px_32px_rgba(5,12,18,0.20)] backdrop-blur-md">
+            <p className="font-dm-mono text-[11px] uppercase tracking-[0.18em] text-white/76">
+              {specialty.code}
+            </p>
+            <h3 className="mt-2 text-[28px] leading-[0.98] font-bold">
+              {specialty.name}
+            </h3>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-4 p-5">
-        <div className="inline-flex items-center gap-2 rounded-full bg-teal-light px-4 py-2.5 text-teal">
-          <BriefcaseMedical size={15} />
-          <span className="font-medium">
-            {(specialty.serviceIds || []).length} servicios relacionados
-          </span>
-        </div>
+      <div className="relative -mt-6 rounded-t-[26px] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),#ffffff)] px-5 pb-5 pt-7">
+        <div className="space-y-5">
+          <div>
+            <p className="text-[15px] leading-[1.8] text-text-mid">
+              {specialty.description}
+            </p>
+          </div>
 
-        <div className="flex items-center justify-between border-t border-black/6 pt-4 text-sm font-bold text-teal">
-          <span>Abrir especialidad</span>
-          <span className="transition-transform group-hover:translate-x-1">→</span>
+          <div className="inline-flex items-center gap-2 rounded-full bg-teal-light px-4 py-2.5 text-teal">
+            <BriefcaseMedical size={15} />
+            <span className="font-medium">
+              {(specialty.serviceIds || []).length} servicios relacionados
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-black/6 pt-4 text-sm font-bold text-teal">
+            <span>Abrir especialidad</span>
+            <span className="transition-transform group-hover:translate-x-1">→</span>
+          </div>
         </div>
       </div>
     </article>
@@ -595,11 +700,14 @@ function ServiceDetail({ service, specialties, onBack, onOpenSpecialty }) {
 
       <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] items-start">
         <div className="overflow-hidden rounded-[28px] border border-black/5 bg-white shadow-[0_18px_48px_rgba(17,35,44,0.08)]">
-          <div className="flex aspect-square items-center justify-center bg-[linear-gradient(135deg,#f7f8f6,#edf3f1)] p-6 md:p-8">
-            <div className="flex h-full w-full items-center justify-center rounded-[24px] bg-white text-teal shadow-[0_22px_52px_rgba(17,35,44,0.12)] ring-1 ring-black/4">
-              <Icon size={84} strokeWidth={1.5} />
-            </div>
-          </div>
+          <ImageFrame
+            src={serviceImageSrc(service.id)}
+            alt={service.name}
+            icon={Icon}
+            className="aspect-square w-full"
+            iconSize={84}
+            fallbackLabel="Imagen del servicio"
+          />
         </div>
 
         <div className="space-y-6">
@@ -703,10 +811,20 @@ function SpecialtyDetail({ specialty, relatedServices, onBack, onOpenService }) 
 
       <div className="rounded-[30px] border border-black/6 bg-white p-8 shadow-[0_18px_48px_rgba(17,35,44,0.06)]">
         <div className="mb-8 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-start">
-          <div>
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#f1e3d8] text-sand">
-              <Icon size={22} />
-            </div>
+          <div className="grid gap-6 lg:grid-cols-[320px_1fr] lg:items-start">
+            <ImageFrame
+              src={specialtyImageSrc(specialty.id)}
+              alt={specialty.name}
+              icon={Icon}
+              accent="sand"
+              className="aspect-[4/5] w-full rounded-[24px] border border-black/6"
+              iconSize={72}
+              fallbackLabel="Imagen de la especialidad"
+            />
+            <div>
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#f1e3d8] text-sand">
+                <Icon size={22} />
+              </div>
             <p className="font-dm-mono text-[12px] uppercase tracking-[0.18em] text-text-muted mb-3">
               {specialty.code}
             </p>
@@ -716,6 +834,7 @@ function SpecialtyDetail({ specialty, relatedServices, onBack, onOpenService }) 
             <p className="mt-4 max-w-3xl text-[17px] leading-[1.8] text-text-mid">
               {specialty.description}
             </p>
+          </div>
           </div>
 
           <div className="rounded-[22px] border border-black/5 bg-[linear-gradient(135deg,#ffffff,#f7f1ec)] p-6 text-right">
@@ -747,11 +866,14 @@ function SpecialtyDetail({ specialty, relatedServices, onBack, onOpenService }) 
                   onClick={() => onOpenService(service.id)}
                   className="overflow-hidden rounded-[22px] border border-black/5 bg-white text-left shadow-[0_12px_30px_rgba(17,35,44,0.06)] transition-all hover:-translate-y-[4px]"
                 >
-                  <div className="bg-[linear-gradient(135deg,#f7f8f6,#edf3f1)] p-4">
-                    <div className="flex aspect-square items-center justify-center rounded-[18px] bg-white shadow-[0_12px_28px_rgba(17,35,44,0.10)]">
-                      <RelatedIcon size={58} className="text-teal" />
-                    </div>
-                  </div>
+                  <ImageFrame
+                    src={serviceImageSrc(service.id)}
+                    alt={service.name}
+                    icon={RelatedIcon}
+                    className="aspect-[4/3] w-full"
+                    iconSize={58}
+                    fallbackLabel="Imagen clínica"
+                  />
                   <div className="p-5">
                     <p className="mb-2 font-dm-mono text-[11px] uppercase tracking-[0.18em] text-text-muted">
                       {service.code}
