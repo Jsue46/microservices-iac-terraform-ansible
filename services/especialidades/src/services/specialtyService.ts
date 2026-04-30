@@ -1,25 +1,45 @@
-import type { SpecialtyRecord, SpecialtyPayload } from "../types.ts";
-import { specialtyRepository } from "../repositories/specialtyRepository.ts";
+import type {
+  SpecialtyPayload,
+  SpecialtyRecord,
+  SpecialtyRepositoryPort
+} from "../types.ts";
 import { randomUUID } from "node:crypto";
 
-export const specialtyService = {
+function createCode(name: string): string {
+  return String(name)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
+export class SpecialtyService {
+  repository: SpecialtyRepositoryPort;
+
+  constructor(repository: SpecialtyRepositoryPort) {
+    this.repository = repository;
+  }
+
   async getAll(): Promise<SpecialtyRecord[]> {
-    return specialtyRepository.getAll();
-  },
+    return this.repository.getAll();
+  }
 
   async getById(id: string): Promise<SpecialtyRecord | null> {
-    return specialtyRepository.findById(id);
-  },
+    return this.repository.findById(id);
+  }
 
   async getByCode(code: string): Promise<SpecialtyRecord | null> {
-    return specialtyRepository.findByCode(code);
-  },
+    return this.repository.findByCode(code);
+  }
 
   async create(payload: SpecialtyPayload): Promise<SpecialtyRecord> {
     const now = new Date().toISOString();
+    const code = payload.code ? createCode(payload.code) : createCode(payload.name ?? "");
     const record: SpecialtyRecord = {
       id: randomUUID(),
-      code: payload.code ?? (payload.name ?? "").toUpperCase().replace(/\s+/g, "-"),
+      code,
       name: payload.name ?? "",
       description: payload.description ?? "",
       isActive: payload.isActive ?? true,
@@ -27,22 +47,23 @@ export const specialtyService = {
       createdAt: now,
       updatedAt: now,
     };
-    return specialtyRepository.create(record);
-  },
+    return this.repository.create(record);
+  }
 
   async replace(id: string, payload: SpecialtyPayload): Promise<SpecialtyRecord | null> {
-    const existing = await specialtyRepository.findById(id);
+    const existing = await this.repository.findById(id);
     if (!existing) return null;
     const updated: SpecialtyRecord = {
       ...existing,
       ...payload,
+      code: payload.code ? createCode(payload.code) : existing.code,
       id,
       updatedAt: new Date().toISOString(),
     };
-    return specialtyRepository.replace(id, updated);
-  },
+    return this.repository.replace(id, updated);
+  }
 
   async delete(id: string): Promise<boolean> {
-    return specialtyRepository.delete(id);
-  },
-};
+    return this.repository.delete(id);
+  }
+}

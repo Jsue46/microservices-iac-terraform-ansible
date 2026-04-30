@@ -2,11 +2,9 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import { once } from "node:events";
 import { createApp } from "../src/app.ts";
-import { specialtyRepository } from "../src/repositories/specialtyRepository.ts";
 
 async function startTestServer(): Promise<{ server: http.Server; baseUrl: string }> {
-  await specialtyRepository.initialize();
-  const handler = createApp();
+  const handler = await createApp();
   const server = http.createServer(handler);
   server.listen(0, "127.0.0.1");
   await once(server, "listening");

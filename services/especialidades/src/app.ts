@@ -1,10 +1,32 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { SpecialtyController } from "./controllers/specialtyController.ts";
 import { specialtyRouter } from "./routes/specialtyRouter.ts";
 import { sendJson, sendError } from "./utils/http.ts";
 import { getConfig } from "./config/env.ts";
+import { SpecialtyRepository } from "./repositories/specialtyRepository.ts";
+import { PostgresSpecialtyRepository } from "./repositories/postgresSpecialtyRepository.ts";
+import { SpecialtyService } from "./services/specialtyService.ts";
+import type { SpecialtyRepositoryPort } from "./types.ts";
 
-export function createApp(): (req: IncomingMessage, res: ServerResponse) => void {
+async function createRepository(): Promise<SpecialtyRepositoryPort> {
   const config = getConfig();
+
+  if (config.persistenceMode === "postgres") {
+    const repository = new PostgresSpecialtyRepository(config);
+    await repository.initialize();
+    return repository;
+  }
+
+  const repository = new SpecialtyRepository();
+  await repository.initialize();
+  return repository;
+}
+
+export async function createApp(): Promise<(req: IncomingMessage, res: ServerResponse) => void> {
+  const config = getConfig();
+  const repository = await createRepository();
+  const service = new SpecialtyService(repository);
+  const controller = new SpecialtyController(service);
 
   return function handler(req: IncomingMessage, res: ServerResponse): void {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -32,7 +54,7 @@ export function createApp(): (req: IncomingMessage, res: ServerResponse) => void
       return;
     }
 
-    const handled = specialtyRouter(req, res, pathname);
+    const handled = specialtyRouter(controller, req, res, pathname);
     if (!handled) {
       sendError(res, 404, "NOT_FOUND", "Ruta no encontrada.");
     }

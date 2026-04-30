@@ -1,16 +1,13 @@
 import http from "node:http";
 import { createApp } from "./app.ts";
 import { getConfig } from "./config/env.ts";
-import { specialtyRepository } from "./repositories/specialtyRepository.ts";
 
 const config = getConfig();
 
 let server: http.Server;
 
 async function bootstrap(): Promise<http.Server> {
-  await specialtyRepository.initialize();
-
-  const handler = createApp();
+  const handler = await createApp();
   const createdServer = http.createServer(handler);
 
   await new Promise<void>((resolve) => {
